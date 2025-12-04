@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "legajosonline-959f6"
+  },
+  "targets": {
+    "legajosonline-959f6": {
+      "hosting": {
+        "web": [
+          "bacarpass"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
