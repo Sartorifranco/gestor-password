@@ -1,8 +1,17 @@
 rules_version = '2';
 
-// ATENCIÓN: estas reglas son únicas para TODO el proyecto legajosonline-959f6
-// (BacarPass, salas, libro-guardia, bacarsaweb...). Desplegar reglas desde otro
-// repositorio reemplaza este archivo completo y deja a BacarPass sin acceso.
+// FUENTE ÚNICA de las reglas de Firestore del proyecto legajosonline-959f6.
+// Las reglas son una sola para todo el proyecto: cualquier deploy de reglas desde
+// otro repositorio reemplaza este archivo completo. Ningún otro repo debe declarar
+// "firestore.rules" en su firebase.json. Para cambiar el acceso de cualquier app:
+// editar acá, correr `npm run test:rules` y desplegar con
+// `firebase deploy --only firestore:rules`.
+//
+// Apps del proyecto:
+// - BacarPass: bacarpass_members / bacarpass_items (ver abajo).
+// - Salas y otras apps con datos en artifacts/{app}/public/data: acceso autenticado.
+// - Libro de Guardia (repo LG): sin acceso directo, usa Cloud Functions (Admin SDK).
+// - IT Ops Hub (repo appsis): fuera de uso, colecciones itops_* bloqueadas.
 service cloud.firestore {
   match /databases/{database}/documents {
 

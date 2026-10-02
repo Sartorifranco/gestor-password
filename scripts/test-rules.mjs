@@ -24,6 +24,7 @@ const anon = as('someAnonymousUid');
 const ana = as('ana');
 const beto = as('beto');
 const admin = as('admin1');
+const itops = env.authenticatedContext('itUser', { email: 'sistemas.ti@bacarsa.com.ar', email_verified: true }).firestore();
 const items = (db) => collection(db, 'bacarpass_items');
 
 const cases = [
@@ -57,6 +58,12 @@ const cases = [
 
   ['otras apps (salas) siguen funcionando', () => assertSucceeds(getDoc(doc(anon, 'artifacts/salas-app/public/data/rooms/r1')))],
   ['otras apps escriben', () => assertSucceeds(setDoc(doc(anon, 'artifacts/salas-app/public/data/rooms/r2'), { name: 'Sala 2' }))],
+
+  ['IT Ops Hub bloqueado (itops_gastos)', () => assertFails(getDocs(collection(itops, 'itops_gastos')))],
+  ['IT Ops Hub bloqueado (itops_equipo)', () => assertFails(setDoc(doc(itops, 'itops_equipo/x'), { name: 'x' }))],
+  ['IT Ops Hub no lee BacarPass', () => assertFails(getDocs(items(itops)))],
+  ['Libro de Guardia sin acceso directo (users)', () => assertFails(getDocs(collection(itops, 'users')))],
+  ['Libro de Guardia sin acceso directo (entries)', () => assertFails(getDocs(collection(anon, 'entries')))],
 ];
 
 let failed = 0;
