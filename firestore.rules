@@ -11,6 +11,8 @@ rules_version = '2';
 // - BacarPass: bacarpass_members / bacarpass_items (ver abajo).
 // - Salas y otras apps con datos en artifacts/{app}/public/data: acceso autenticado.
 // - Libro de Guardia (repo LG): sin acceso directo, usa Cloud Functions (Admin SDK).
+//   hardware_detect_jobs puede tener passwords de equipos hasta el claim; se borra
+//   con TTL nativo sobre expireAt (configurado en Firebase Console → Firestore → TTL).
 // - IT Ops Hub (repo appsis): fuera de uso, colecciones itops_* bloqueadas.
 service cloud.firestore {
   match /databases/{database}/documents {
