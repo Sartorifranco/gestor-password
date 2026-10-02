@@ -1,0 +1,57 @@
+rules_version = '2';
+
+// ATENCIÓN: estas reglas son únicas para TODO el proyecto legajosonline-959f6
+// (BacarPass, salas, libro-guardia, bacarsaweb...). Desplegar reglas desde otro
+// repositorio reemplaza este archivo completo y deja a BacarPass sin acceso.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Otras apps del proyecto (ruta genérica artifacts/*) ───────────────
+    match /artifacts/{artifactId}/public/data/{collectionName}/{document=**} {
+      allow read, write: if request.auth != null && artifactId != 'bacarpass-v1';
+    }
+
+    // ── BacarPass ─────────────────────────────────────────────────────────
+    // Los datos legacy (artifacts/bacarpass-v1) quedan bloqueados: tenían PINs
+    // y contraseñas legibles por cualquier sesión anónima.
+    // Altas, bajas, roles y PINs de miembros se gestionan vía Cloud Functions.
+
+    function bpMemberPath() {
+      return /databases/$(database)/documents/bacarpass_members/$(request.auth.uid);
+    }
+
+    function bpMember() {
+      return request.auth != null && exists(bpMemberPath());
+    }
+
+    function bpAdmin() {
+      return bpMember() && get(bpMemberPath()).data.role == 'admin';
+    }
+
+    function bpOwns(data) {
+      return data.ownerUid == request.auth.uid;
+    }
+
+    match /bacarpass_members/{uid} {
+      allow read: if bpMember();
+      allow write: if false;
+    }
+
+    match /bacarpass_items/{itemId} {
+      allow read: if bpMember() && (
+        bpOwns(resource.data)
+        || request.auth.uid in resource.data.get('sharedWithUids', [])
+        || bpAdmin()
+      );
+      allow create: if bpMember() && (bpOwns(request.resource.data) || bpAdmin());
+      allow update: if bpMember()
+        && (bpOwns(resource.data) || bpAdmin())
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+      allow delete: if bpMember() && (bpOwns(resource.data) || bpAdmin());
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
